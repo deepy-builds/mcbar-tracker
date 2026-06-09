@@ -59,7 +59,7 @@ No setup needed. Just open `index.html` in any browser.
 
 Served via **GitHub Pages** at:
 ```
-https://YOUR-USERNAME.github.io/bar-review-tracker/
+[https://deepy-builds.github.io/mcbar-tracker/]
 ```
 
 To add to your phone's home screen: open the URL in your mobile browser → Share → **Add to Home Screen**.
