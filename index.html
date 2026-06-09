@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sprint Tracker — Mock Bar Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1c1622; --bg2:#15101b; --surface:#271f30; --surface2:#322839;
+    --line:#3c3047; --line2:#4d3f59;
+    --ink:#f4e8f0; --muted:#bda6bd; --faint:#8a7691;
+    --pink:#ff9ecb; --pink-deep:#ff7fb6; --pink-soft:rgba(255,158,203,.16); --pink-line:rgba(255,158,203,.42);
+    --lilac:#c6a8ff;
+    --coral:#ff9a9e; --coral-soft:rgba(255,154,158,.16); --coral-line:rgba(255,154,158,.45);
+    --radius:20px; --radius-sm:14px;
+    --body:"Quicksand",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --display:"Baloo 2",var(--body);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 520px at 86% -10%, rgba(255,158,203,.14), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(198,168,255,.10), transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--body); font-weight:500;
+    -webkit-font-smoothing:antialiased; line-height:1.5; padding:0 0 66px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px}
+
+  /* ---------- hero ---------- */
+  .hero{padding:30px 0 12px}
+  .eyebrow{font-family:var(--body);font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);margin:0 0 9px;display:flex;align-items:center;gap:7px}
+  .title{font-family:var(--display);font-weight:800;font-size:clamp(32px,8.6vw,48px);line-height:.98;letter-spacing:-.01em;margin:0}
+  .title em{font-style:normal;color:var(--pink)}
+  .sub{color:var(--muted);font-size:14px;margin:10px 0 0;max-width:46ch;font-weight:500}
+
+  .meters{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:20px}
+  .meter{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px}
+  .meter .k{font-weight:700;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint)}
+  .countnum{font-family:var(--display);font-weight:800;font-size:42px;line-height:1;margin:7px 0 2px}
+  .countnum .u{font-size:15px;color:var(--muted);font-weight:700;margin-left:5px}
+  .countsub{font-size:12.5px;color:var(--muted)}
+  .pct{font-family:var(--display);font-weight:800;font-size:42px;line-height:1;margin:7px 0 12px}
+  .pct .u{font-size:17px;color:var(--muted);margin-left:1px}
+  .bar{height:9px;border-radius:99px;background:var(--surface2);overflow:hidden}
+  .bar > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ff7fb6,#ffb0d6);transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .meter .det{font-size:12px;color:var(--muted);margin-top:10px;font-weight:600}
+
+  /* progress bar with cute cloud mascot */
+  .bigbar{position:relative;height:13px;overflow:visible}
+  .bigbar > .track{position:absolute;inset:0;background:var(--surface2);border-radius:99px;overflow:hidden}
+  .bigbar > .track > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ff7fb6,#ffc2de);transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .mascot{position:absolute;top:50%;width:30px;height:23px;transform:translate(-50%,-50%);
+    transition:left .9s cubic-bezier(.2,.7,.2,1);filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));pointer-events:none}
+  .spark{position:absolute;color:var(--pink);opacity:.8;animation:twinkle 2.6s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:.9;transform:scale(1.1)}}
+
+  /* ---------- streak ---------- */
+  .streak{margin-top:13px;display:flex;align-items:center;gap:13px;
+    background:linear-gradient(135deg,rgba(255,158,203,.16),rgba(198,168,255,.10));
+    border:1px solid var(--pink-line);border-radius:var(--radius);padding:13px 16px}
+  .streak .star{flex-shrink:0;width:34px;height:34px}
+  .streak .big{font-family:var(--display);font-weight:800;font-size:26px;line-height:1}
+  .streak .lab{font-weight:700;font-size:13px;color:var(--ink)}
+  .streak .msg{font-size:12px;color:var(--muted);font-weight:600;margin-left:auto;text-align:right;max-width:46%}
+
+  /* ---------- up next ---------- */
+  .next{margin-top:13px;border-radius:var(--radius);padding:1.5px;background:linear-gradient(150deg,var(--pink-line),transparent 58%)}
+  .next.is-exam{background:linear-gradient(150deg,var(--coral-line),transparent 58%)}
+  .next.is-done{background:linear-gradient(150deg,var(--lilac),transparent 58%)}
+  .next-in{background:linear-gradient(180deg,#2e2436,#241c2c);border-radius:calc(var(--radius) - 1px);padding:16px 17px}
+  .next-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+  .pulse{width:10px;height:10px;border-radius:50%;background:var(--pink);animation:pulse 2.4s infinite}
+  .next.is-exam .pulse{background:var(--coral)} .next.is-done .pulse{background:var(--lilac);animation:none}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,158,203,.5)}70%{box-shadow:0 0 0 12px rgba(255,158,203,0)}100%{box-shadow:0 0 0 0 rgba(255,158,203,0)}}
+  .next-label{font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--pink)}
+  .next.is-exam .next-label{color:var(--coral)} .next.is-done .next-label{color:var(--lilac)}
+  .next-when{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600}
+  .next-task{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.22;margin:0}
+  .next-day{font-size:13px;color:var(--muted);margin:7px 0 0;font-weight:600}
+  .next-time{color:var(--pink);font-weight:700}
+  .next-btn{margin-top:14px;width:100%;border:0;cursor:pointer;border-radius:13px;padding:13px;
+    font-family:var(--display);font-weight:700;font-size:15px;background:var(--pink);color:#3a1326;transition:transform .12s,filter .15s}
+  .next-btn:hover{filter:brightness(1.05)} .next-btn:active{transform:translateY(1px)}
+  .next.is-exam .next-btn{background:var(--coral);color:#3a1414}
+  .next.is-done .next-task{font-size:17px}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{position:sticky;top:0;z-index:30;display:flex;gap:8px;align-items:center;
+    margin:22px -18px 6px;padding:11px 18px;background:rgba(28,22,34,.88);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .toolprog{flex:1;min-width:0}
+  .toolprog .lab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .toolprog .lab b{color:var(--ink);font-weight:700}
+  .seg{display:flex;background:var(--surface2);border-radius:11px;padding:3px;border:1px solid var(--line)}
+  .seg button{border:0;background:transparent;color:var(--muted);font-family:var(--body);font-weight:700;font-size:12.5px;padding:6px 11px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .seg button[aria-pressed="true"]{background:var(--pink);color:#3a1326}
+  .ghost{border:1px solid var(--line2);background:transparent;color:var(--ink);font-family:var(--body);font-weight:700;font-size:12.5px;padding:7px 12px;border-radius:11px;cursor:pointer;white-space:nowrap}
+  .ghost:hover{border-color:var(--pink-line);color:var(--pink)}
+
+  /* ---------- weeks / days ---------- */
+  .week{margin-top:26px}
+  .week-h{display:flex;align-items:baseline;gap:11px;margin:0 2px 12px}
+  .week-n{font-family:var(--display);font-weight:800;font-size:13px;color:var(--pink);letter-spacing:.02em}
+  .week-t{font-family:var(--display);font-weight:700;font-size:16px}
+  .week-bar{flex:1;height:6px;border-radius:99px;background:var(--surface2);min-width:36px;overflow:hidden}
+  .week-bar > i{display:block;height:100%;background:var(--pink);border-radius:99px;transition:width .8s ease}
+  .week-c{font-size:11px;color:var(--muted);font-weight:700}
+  .week-sub{font-size:11.5px;color:var(--muted);font-weight:600;margin:-6px 2px 13px;opacity:.85}
+
+  .day{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:11px;overflow:hidden}
+  .day.is-exam{border-color:var(--coral-line);background:linear-gradient(180deg,rgba(255,154,158,.07),var(--surface))}
+  .day.is-today{border-color:var(--pink-line);box-shadow:0 0 0 1px var(--pink-line)}
+  summary{list-style:none} summary::-webkit-details-marker{display:none}
+  .day-h{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;border:0;background:transparent;color:inherit;padding:15px 16px;font-family:var(--body)}
+  .date-chip{flex-shrink:0;width:50px;text-align:center;line-height:1}
+  .date-chip .d{font-family:var(--display);font-weight:800;font-size:22px}
+  .date-chip .m{font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block;margin-top:3px}
+  .date-chip .dow{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;font-weight:600}
+  .day-mid{flex:1;min-width:0}
+  .day-subj{font-family:var(--display);font-weight:700;font-size:15.5px;line-height:1.25}
+  .day-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:600}
+  .badge{font-weight:700;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:8px}
+  .badge.today{background:var(--pink-soft);color:var(--pink)}
+  .badge.exam{background:var(--coral-soft);color:var(--coral)}
+  .ring{flex-shrink:0;width:42px;height:42px;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .rt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted)}
+  .chev{flex-shrink:0;color:var(--faint);transition:transform .25s ease}
+  .day[open] .chev{transform:rotate(90deg)}
+  .day-body{padding:2px 10px 10px}
+
+  /* ---------- rows ---------- */
+  .row{display:flex;align-items:flex-start;gap:11px;padding:8px 8px;border-radius:13px;transition:background .15s}
+  .row:hover{background:var(--surface2)}
+  .rowline + .rowline{border-top:1px solid var(--line)}
+  .check{flex-shrink:0;width:26px;height:26px;border:0;background:transparent;cursor:pointer;padding:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+  .check svg{width:23px;height:23px;transition:transform .18s cubic-bezier(.3,1.4,.5,1)}
+  .check .hf{fill:transparent;stroke:var(--line2);stroke-width:2;transition:all .18s}
+  .row.dim .check{width:22px;height:22px}.row.dim .check svg{width:19px;height:19px}
+  .row[aria-checked="true"] .check .hf{fill:var(--pink);stroke:var(--pink)}
+  .row[aria-checked="true"] .check svg{transform:scale(1.08)}
+  .row.exam[aria-checked="true"] .check .hf{fill:var(--coral);stroke:var(--coral)}
+  .row-body{flex:1;min-width:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer;font-family:var(--body);padding:0}
+  .row-time{font-size:11px;color:var(--faint);font-weight:600;font-variant-numeric:tabular-nums}
+  .row.focus .row-time{color:var(--pink)} .row.exam .row-time{color:var(--coral)}
+  .row-text{font-size:14px;margin-top:2px;line-height:1.4;font-weight:600}
+  .row.dim .row-text{color:var(--muted);font-size:13px;font-weight:500}
+  .row.exam .row-text{font-family:var(--display);font-weight:700}
+  .row[aria-checked="true"] .row-text{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line2)}
+  .tag{display:inline-block;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:7px;vertical-align:1px}
+  .row.exam .tag{color:var(--coral);border-color:var(--coral-line)}
+  .note-btn{flex-shrink:0;border:0;background:transparent;cursor:pointer;padding:4px;border-radius:9px;color:var(--faint);display:flex;align-items:center;margin-top:-1px}
+  .note-btn:hover{color:var(--pink);background:var(--pink-soft)}
+  .note-btn.has{color:var(--pink)}
+  .note-btn svg{width:18px;height:18px}
+  .note-preview{display:block;font-size:12px;color:var(--lilac);font-style:italic;font-weight:600;margin-top:5px;line-height:1.35}
+  .note-edit{margin:2px 8px 8px 37px}
+  .note-edit textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:12px;color:var(--ink);
+    font-family:var(--body);font-weight:500;font-size:13px;padding:9px 11px;resize:vertical;min-height:54px;line-height:1.45}
+  .note-edit textarea:focus{outline:2px solid var(--pink-line);outline-offset:0;border-color:transparent}
+  .note-edit .hint{font-size:10.5px;color:var(--faint);margin-top:4px;font-weight:600}
+
+  body.only-focus .row.dim,body.only-focus .rowline.dimline{display:none}
+
+  .foot{margin-top:30px;padding:20px;border:1.5px dashed var(--line2);border-radius:var(--radius);text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6;font-weight:600}
+  .foot b{color:var(--pink);font-family:var(--display)}
+  .note{font-size:12px;color:var(--faint);text-align:center;margin-top:14px}
+  .banner{background:var(--coral-soft);border:1px solid var(--coral-line);color:#ffc7c9;border-radius:13px;padding:10px 13px;font-size:12.5px;margin-top:14px;display:none;font-weight:600}
+
+  .reveal{opacity:0;transform:translateY(10px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
+  .reveal.d2{animation-delay:.08s}.reveal.d3{animation-delay:.16s}.reveal.d4{animation-delay:.24s}
+  @keyframes rise{to{opacity:1;transform:none}}
+  :focus-visible{outline:2px solid var(--pink);outline-offset:2px;border-radius:10px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+  @media (max-width:430px){
+    .meters{grid-template-columns:1fr 1fr;gap:9px}
+    .countnum,.pct{font-size:36px}
+    .date-chip{width:44px}
+    .streak .msg{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero reveal">
+    <p class="eyebrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z"/></svg>
+      2026 Mock Bar Exams · Daily Sprint Plan
+    </p>
+    <h1 class="title">Sprint <em>Tracker</em></h1>
+    <p class="sub">One little 50-minute sprint at a time. Tick each session off and your progress (and notes) save themselves.</p>
+    <p class="sub" style="margin-top:7px;font-size:12px;color:var(--faint)">Reverse Study Order · coverage as of June 30, 2025 · master the main-opinion doctrines.</p>
+
+    <div class="meters">
+      <div class="meter">
+        <div class="k">Countdown to Exam Day 1</div>
+        <div class="countnum" id="countNum">—<span class="u" id="countUnit"></span></div>
+        <div class="countsub" id="countSub">First exam · July 8</div>
+      </div>
+      <div class="meter">
+        <div class="k">Focus sessions done</div>
+        <div class="pct" id="pctNum">0<span class="u">%</span></div>
+        <div class="bigbar">
+          <div class="track"><i id="pctBar" style="width:0"></i></div>
+          <span class="mascot" id="pctMascot" style="left:0"></span>
+        </div>
+        <div class="det" id="pctDet">0 of 125 sessions</div>
+      </div>
+    </div>
+
+    <div class="streak">
+      <svg class="star" viewBox="0 0 40 40" aria-hidden="true">
+        <defs><radialGradient id="sg" cx="50%" cy="40%"><stop offset="0%" stop-color="#ffd2e8"/><stop offset="100%" stop-color="#ff7fb6"/></radialGradient></defs>
+        <path d="M20 3l4.3 11.4L36 18l-11.7 3.6L20 33l-4.3-11.4L4 18l11.7-3.6z" fill="url(#sg)"/>
+        <circle cx="16" cy="17" r="1.5" fill="#5b2740"/><circle cx="24" cy="17" r="1.5" fill="#5b2740"/>
+        <path d="M17.5 20q2.5 2 5 0" stroke="#5b2740" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="big"><span id="streakNum">0</span> <span class="lab" id="streakWord">day streak</span></div>
+      </div>
+      <div class="msg" id="streakMsg">Finish a session today to start your streak ✨</div>
+    </div>
+
+    <div class="banner" id="storeBanner">Heads up — progress can't be saved in this view, so it'll reset when the tab closes. Opening the file in a normal browser fixes this.</div>
+  </header>
+
+  <section class="next reveal d2" id="nextCard" hidden>
+    <div class="next-in">
+      <div class="next-top">
+        <span class="pulse"></span>
+        <span class="next-label" id="nextLabel">Up next</span>
+        <span class="next-when" id="nextWhen"></span>
+      </div>
+      <p class="next-task" id="nextTask"></p>
+      <p class="next-day" id="nextDay"></p>
+      <button class="next-btn" id="nextBtn">Mark this session done</button>
+    </div>
+  </section>
+
+  <div class="toolbar reveal d3">
+    <span id="syncDot" style="font-size:11px;font-weight:700;color:var(--lilac);white-space:nowrap;transition:color .3s"></span>
+    <div class="toolprog">
+      <div class="lab"><span>Overall</span><b id="tbCount">0 / 125</b></div>
+      <div class="bar"><i id="tbBar" style="width:0"></i></div>
+    </div>
+    <div class="seg" role="group" aria-label="Filter sessions">
+      <button id="fAll" aria-pressed="true">All</button>
+      <button id="fFocus" aria-pressed="false">Study</button>
+    </div>
+    <button class="ghost" id="todayBtn">Today</button>
+  </div>
+
+  <main id="weeks" class="reveal d4"></main>
+
+  <div class="foot" id="foot">
+    You aren't climbing the whole mountain tonight — just finishing the next little sprint.
+    <br><b>You've got this 💗</b>
+  </div>
+  <p class="note"><button class="ghost" id="resetBtn" style="font-size:12px">Reset all progress &amp; notes</button></p>
+</div>
+
+<script>
+// 2026 Mock Bar review — Reverse Study Order (RSO) schedule, parsed from the updated PDF.
+// Remedial first → Political last. Almost every block is a 50-min focus sprint (study);
+// the mock exams are tagged "exam". Citation markers from the source were stripped.
+const WEEKS = [
+  {
+    n:1, label:"PHASE 1", title:"Remedial Law & Ethics",
+    sub:"25% weight · updated rules · her trickiest area · June 10–15",
+    days:[
+      { date:"2026-06-10", dow:"Wed", subject:"Remedial Law — Jurisdiction", tasks:[
+        ["6:30 PM – 7:20 PM","Concept & nature of Remedial Law; Construction; Hierarchy of Courts","study"],
+        ["7:30 PM – 8:20 PM","Jurisdiction — subject matter; original vs appellate; exclusive vs concurrent","study"],
+        ["8:30 PM – 9:20 PM","Acquired jurisdiction over parties, issues, and the res","study"],
+        ["9:30 PM – 10:20 PM","Jurisdiction of PH courts (SC, CA, Sandiganbayan, RTC, MTC / Lupong Tagapamayapa)","study"],
+      ]},
+      { date:"2026-06-11", dow:"Thu", subject:"Civil Procedure — Pleadings", tasks:[
+        ["6:30 PM – 7:20 PM","Classification of actions; cause of action; parties to civil actions","study"],
+        ["7:30 PM – 8:20 PM","Venue; pleadings — kinds, parts, and allegations","study"],
+        ["8:30 PM – 9:20 PM","Responsive pleadings; amended & supplemental pleadings","study"],
+        ["9:30 PM – 10:20 PM","Filing & service of pleadings (e-filing and paper rule)","study"],
+      ]},
+      { date:"2026-06-12", dow:"Fri", subject:"Civil Procedure — Summons & Motions", tasks:[
+        ["6:30 PM – 7:20 PM","Summons — issuance, purpose, personal/substituted service","study"],
+        ["7:30 PM – 8:20 PM","Extraterritorial service; Hague Service Convention; service on corporations/minors","study"],
+        ["8:30 PM – 9:20 PM","Motions — litigious, prohibited, and omnibus","study"],
+        ["9:30 PM – 10:20 PM","Dismissal (upon notice or motion) and default","study"],
+      ]},
+      { date:"2026-06-13", dow:"Sat", subject:"Civil Procedure — Trial to Execution", tag:"Long study day · grocery & errands", tasks:[
+        ["8:00 AM – 8:50 AM","Pre-trial (Rule 18); CAM & JDR; intervention","study"],
+        ["9:00 AM – 9:50 AM","Subpoena; computation of time; modes of discovery (Rules 23–29)","study"],
+        ["10:00 AM – 10:50 AM","Trial (Rule 30); consolidation/severance; demurrer to evidence","study"],
+        ["11:00 AM – 11:50 AM","Judgments — rendered, on pleadings, and summary","study"],
+        ["1:00 PM – 1:50 PM","Post-judgment remedies (new trial, reconsideration, relief)","study"],
+        ["2:00 PM – 2:50 PM","Annulment of judgment (Rule 47); appeals (MTC→RTC; RTC→CA)","study"],
+        ["3:00 PM – 3:50 PM","Practical exercises — typing promissory notes, demand letters, sale/lease contracts","study"],
+        ["4:00 PM – 4:50 PM","Execution, satisfaction & effect of judgments; exempt properties","study"],
+      ]},
+      { date:"2026-06-14", dow:"Sun", subject:"Provisional Remedies, Special Actions & Ethics", tag:"Movement morning · laundry evening", tasks:[
+        ["1:00 PM – 1:50 PM","Provisional remedies (attachment, injunction, receivership, replevin)","study"],
+        ["2:00 PM – 2:50 PM","Special civil actions (certiorari, prohibition, mandamus, quo warranto, expropriation)","study"],
+        ["3:00 PM – 3:50 PM","Special civil actions (foreclosure, partition, forcible entry/unlawful detainer, contempt)","study"],
+        ["4:00 PM – 4:50 PM","Special proceedings & writs (settlement of estate, guardianship, habeas corpus)","study"],
+        ["5:00 PM – 5:50 PM","Special writs (amparo, habeas data, kalikasan, change of name)","study"],
+        ["6:00 PM – 6:50 PM","Ethics (limited) — practice of law; CPRA Canons I–VI; judicial ethics","study"],
+      ]},
+      { date:"2026-06-15", dow:"Mon", subject:"Criminal Procedure & Evidence", tasks:[
+        ["6:30 PM – 7:20 PM","Criminal procedure — prosecution of offenses & civil actions","study"],
+        ["7:30 PM – 8:20 PM","Criminal procedure — preliminary investigation, inquest, arrest","study"],
+        ["8:30 PM – 9:20 PM","Evidence — admissibility; object & documentary evidence","study"],
+        ["9:30 PM – 10:20 PM","Evidence — testimonial; hearsay rule; presentation of evidence","study"],
+      ]},
+    ]
+  },
+  {
+    n:2, label:"PHASE 2", title:"Criminal Law",
+    sub:"10% weight · RPC & Special Penal Laws · June 16–21",
+    days:[
+      { date:"2026-06-16", dow:"Tue", subject:"Fundamentals & Felonies", tasks:[
+        ["6:30 PM – 7:20 PM","Fundamental principles (construction; mala in se vs mala prohibita; cardinal principles)","study"],
+        ["7:30 PM – 8:20 PM","Felonies — stages of execution (attempted, frustrated, consummated)","study"],
+        ["8:30 PM – 9:20 PM","Plurality of crimes (absorption, complex, continuing)","study"],
+        ["9:30 PM – 10:20 PM","Criminal liability (actus reus/mens rea, causation, aberratio ictus, error in personae)","study"],
+      ]},
+      { date:"2026-06-17", dow:"Wed", subject:"Circumstances & Participation", tasks:[
+        ["6:30 PM – 7:20 PM","Participation (principals, accomplices, accessories); fencers","study"],
+        ["7:30 PM – 8:20 PM","Justifying & exempting circumstances; battered woman syndrome","study"],
+        ["8:30 PM – 9:20 PM","Mitigating, aggravating & alternative circumstances","study"],
+        ["9:30 PM – 10:20 PM","Repeat commission (recidivism, habituality, habitual delinquency)","study"],
+      ]},
+      { date:"2026-06-18", dow:"Thu", subject:"Penalties & Criminal Liability", tasks:[
+        ["6:30 PM – 7:20 PM","Penalties — classification, duration, graduation","study"],
+        ["7:30 PM – 8:20 PM","Execution & service (indeterminate sentence, probation, community service)","study"],
+        ["8:30 PM – 9:20 PM","Extinction of criminal liability","study"],
+        ["9:30 PM – 10:20 PM","Civil liability ex delicto (primary & subsidiary)","study"],
+      ]},
+      { date:"2026-06-19", dow:"Fri", subject:"Crimes vs Security, Order & Public Officers", tasks:[
+        ["6:30 PM – 7:20 PM","Crimes vs national security (piracy, terrorism); fundamental laws","study"],
+        ["7:30 PM – 8:20 PM","Crimes vs public order (firearms, obstruction of justice)","study"],
+        ["8:30 PM – 9:20 PM","Crimes vs public interest (cyber forgery/fraud, cyber-squatting); dangerous drugs","study"],
+        ["9:30 PM – 10:20 PM","Crimes by public officers (plunder, graft, corrupt practices)","study"],
+      ]},
+      { date:"2026-06-20", dow:"Sat", subject:"Crimes vs Persons & Property + Procedure Recap", tag:"Long study day", tasks:[
+        ["8:00 AM – 8:50 AM","Crimes vs persons (human trafficking, VAWC, abuse of children)","study"],
+        ["9:00 AM – 9:50 AM","Crimes vs persons (rape, sexual exploitation/harassment, hazing)","study"],
+        ["10:00 AM – 10:50 AM","Crimes vs personal liberty; crimes vs property (fencing, cattle rustling, arson)","study"],
+        ["11:00 AM – 11:50 AM","Crimes vs property (carnapping, B.P. 22, swindling, IP piracy)","study"],
+        ["1:00 PM – 1:50 PM","Crimes vs chastity (voyeurism); crimes vs civil status; crimes vs honor","study"],
+        ["2:00 PM – 2:50 PM","Quasi-offenses","study"],
+        ["3:00 PM – 3:50 PM","Criminal procedure recap — bail, arraignment, motion to quash","study"],
+        ["4:00 PM – 4:50 PM","Criminal procedure recap — trial, judgment, search & seizure","study"],
+      ]},
+      { date:"2026-06-21", dow:"Sun", subject:"Criminal Law — Bar Q&A Drill", tag:"Review + movement", tasks:[
+        ["1:00 PM – 6:50 PM","Bar Q&A drill (last 10 years) & recent jurisprudence for Criminal Law","study"],
+      ]},
+    ]
+  },
+  {
+    n:3, label:"PHASE 3", title:"Civil Law & Land Titles",
+    sub:"20% weight · extensive coverage · June 22–27",
+    days:[
+      { date:"2026-06-22", dow:"Mon", subject:"Persons & Family — Marriage", tasks:[
+        ["6:30 PM – 7:20 PM","Effect & application of laws; conflict of laws","study"],
+        ["7:30 PM – 8:20 PM","Persons — juridical capacity & capacity to act","study"],
+        ["8:30 PM – 9:20 PM","Marriage — essential & formal requisites; effects","study"],
+        ["9:30 PM – 10:20 PM","Void & voidable marriages; legal separation","study"],
+      ]},
+      { date:"2026-06-23", dow:"Tue", subject:"Family Relations & Civil Register", tasks:[
+        ["6:30 PM – 7:20 PM","Property relations between spouses; paternity & filiation","study"],
+        ["7:30 PM – 8:20 PM","Adoption (domestic & inter-country); foundlings","study"],
+        ["8:30 PM – 9:20 PM","Support; family home; parental authority","study"],
+        ["9:30 PM – 10:20 PM","Civil register — correction of entries; rectification of simulated births","study"],
+      ]},
+      { date:"2026-06-24", dow:"Wed", subject:"Property & Ownership", tasks:[
+        ["6:30 PM – 7:20 PM","Property — classification & ownership attributes","study"],
+        ["7:30 PM – 8:20 PM","Actions to recover ownership; accession; co-ownership","study"],
+        ["8:30 PM – 9:20 PM","Possession; usufruct; easements","study"],
+        ["9:30 PM – 10:20 PM","Modes of acquiring ownership (occupation, tradition, donation, prescription)","study"],
+      ]},
+      { date:"2026-06-25", dow:"Thu", subject:"Land Titles & Succession (start)", tasks:[
+        ["6:30 PM – 7:20 PM","Land titles & deeds — Torrens system; Regalian doctrine","study"],
+        ["7:30 PM – 8:20 PM","Original & confirmation of title; subsequent registration","study"],
+        ["8:30 PM – 9:20 PM","Unregistered lands; assurance fund; reconstitution of title","study"],
+        ["9:30 PM – 10:20 PM","Succession — elements & testamentary succession","study"],
+      ]},
+      { date:"2026-06-26", dow:"Fri", subject:"Succession & Obligations", tasks:[
+        ["6:30 PM – 7:20 PM","Succession — intestate & common provisions","study"],
+        ["7:30 PM – 8:20 PM","Obligations — general provisions & essential elements","study"],
+        ["8:30 PM – 9:20 PM","Classification of obligations (joint/solidary, conditional, etc.)","study"],
+        ["9:30 PM – 10:20 PM","Extinguishment of obligations; estoppel","study"],
+      ]},
+      { date:"2026-06-27", dow:"Sat", subject:"Contracts, Sales & Torts", tag:"Long study day", tasks:[
+        ["8:00 AM – 8:50 AM","Contracts — general provisions & basic principles","study"],
+        ["9:00 AM – 9:50 AM","Form, reformation & defective contracts","study"],
+        ["10:00 AM – 10:50 AM","Sale — nature, form & capacity to buy","study"],
+        ["11:00 AM – 11:50 AM","Sale — vendor obligations, double sale, redemption","study"],
+        ["1:00 PM – 1:50 PM","Lease; agency; mutuum & commodatum; deposit","study"],
+        ["2:00 PM – 2:50 PM","Guaranty/suretyship; real estate mortgage; personal property security","study"],
+        ["3:00 PM – 3:50 PM","Quasi-contracts; torts principles (abuse of right, tortious interference)","study"],
+        ["4:00 PM – 4:50 PM","Torts — tortfeasor, proximate cause & damages","study"],
+      ]},
+    ]
+  },
+  {
+    n:4, label:"PHASE 4", title:"Commercial & Taxation Laws",
+    sub:"20% weight · recently finished commercial law · June 28 – July 2",
+    days:[
+      { date:"2026-06-28", dow:"Sun", subject:"Corporations — Deep Dive", tag:"Movement morning · 6 blocks", tasks:[
+        ["1:00 PM – 6:50 PM","Business organizations: corporations — classes, nationality, personality, incorporation (6 blocks)","study"],
+      ]},
+      { date:"2026-06-29", dow:"Mon", subject:"Corporations, Securities & Insurance", tasks:[
+        ["6:30 PM – 7:20 PM","Corporations — corporate powers; stockholders; directors/trustees","study"],
+        ["7:30 PM – 8:20 PM","Capital affairs; securities (Howey test); merger & dissolution","study"],
+        ["8:30 PM – 9:20 PM","Foreign corporations; special corporations; partnerships","study"],
+        ["9:30 PM – 10:20 PM","Insurance — concept, interest, policy, rescission","study"],
+      ]},
+      { date:"2026-06-30", dow:"Tue", subject:"Transportation, Banking & IP", tasks:[
+        ["6:30 PM – 7:20 PM","Transportation — common carriers & defenses","study"],
+        ["7:30 PM – 8:20 PM","Banking — secrecy of deposits; general banking law","study"],
+        ["8:30 PM – 9:20 PM","Banking — deposit insurance, AMLA, central bank","study"],
+        ["9:30 PM – 10:20 PM","Intellectual property — patents, trademarks, copyright","study"],
+      ]},
+      { date:"2026-07-01", dow:"Wed", subject:"Special Commercial Laws & Tax Principles", tasks:[
+        ["6:30 PM – 7:20 PM","Special commercial laws — FRIA & E-Commerce Act","study"],
+        ["7:30 PM – 8:20 PM","Special commercial laws — New Public Service Act","study"],
+        ["8:30 PM – 9:20 PM","Special commercial laws — Philippine Competition Act","study"],
+        ["9:30 PM – 10:20 PM","Taxation (limited) — general principles & inherent limitations","study"],
+      ]},
+      { date:"2026-07-02", dow:"Thu", subject:"Taxation (Limited)", tasks:[
+        ["6:30 PM – 7:20 PM","NIRC — income tax","study"],
+        ["7:30 PM – 8:20 PM","VAT, estate & donor's tax","study"],
+        ["8:30 PM – 9:20 PM","NIRC tax remedies (assessment & collection)","study"],
+        ["9:30 PM – 10:20 PM","Local taxation & CTA jurisdiction","study"],
+      ]},
+    ]
+  },
+  {
+    n:5, label:"PHASE 5", title:"Political & Public International Law",
+    sub:"15% weight · refreshing 2022 foundations · July 3–7",
+    days:[
+      { date:"2026-07-03", dow:"Fri", subject:"Basic Concepts & Departments", tasks:[
+        ["6:30 PM – 7:20 PM","Basic concepts (sovereignty, separation of powers, state immunity)","study"],
+        ["7:30 PM – 8:20 PM","National territory & citizenship","study"],
+        ["8:30 PM – 9:20 PM","Legislative department — powers, chambers, lawmaking process","study"],
+        ["9:30 PM – 10:20 PM","Executive department — election, privileges, powers","study"],
+      ]},
+      { date:"2026-07-04", dow:"Sat", subject:"Constitutional Rights & Public Officers", tag:"Long study day", tasks:[
+        ["8:00 AM – 8:50 AM","Judicial department & constitutional commissions","study"],
+        ["9:00 AM – 9:50 AM","Constitutional rights — due process, equal protection, searches/seizures","study"],
+        ["10:00 AM – 10:50 AM","Constitutional rights — privacy, speech, religion, information","study"],
+        ["11:00 AM – 11:50 AM","Constitutional rights — custodial investigation; rights of the accused","study"],
+        ["1:00 PM – 1:50 PM","Constitutional rights — double jeopardy, writs, social justice","study"],
+        ["2:00 PM – 2:50 PM","National economy & patrimony; Regalian & public trust doctrines","study"],
+        ["3:00 PM – 3:50 PM","Administrative law; law on public officers","study"],
+        ["4:00 PM – 4:50 PM","Accountability of public officers; Ombudsman & Sandiganbayan","study"],
+      ]},
+      { date:"2026-07-05", dow:"Sun", subject:"Election, LGU & Public International Law", tag:"Movement morning", tasks:[
+        ["1:00 PM – 1:50 PM","Election law — suffrage, candidacy, campaign","study"],
+        ["2:00 PM – 2:50 PM","Election remedies; local governments — powers & autonomy","study"],
+        ["3:00 PM – 3:50 PM","Public international law — sources & subjects","study"],
+        ["4:00 PM – 4:50 PM","Jurisdiction of states & treaty law","study"],
+        ["5:00 PM – 5:50 PM","State responsibility; aliens; human rights & IHL","study"],
+        ["6:00 PM – 6:50 PM","Dispute resolution; law of the sea; environmental law","study"],
+      ]},
+      { date:"2026-07-06", dow:"Mon", subject:"High-Level Review", tasks:[
+        ["6:30 PM – 10:20 PM","High-level review — Political & Commercial Law syllabi (syllabus-only filter)","study"],
+      ]},
+      { date:"2026-07-07", dow:"Tue", subject:"High-Level Review", tasks:[
+        ["6:30 PM – 10:20 PM","High-level review — Political & Commercial Law syllabi (syllabus-only filter)","study"],
+      ]},
+    ]
+  },
+  {
+    n:6, label:"MOCK EXAMS", title:"The Execution",
+    sub:"3 exam days · July 8 · 10 · 11",
+    days:[
+      { date:"2026-07-08", dow:"Wed", subject:"Mock Bar Exam — Day 1", tasks:[
+        ["9:00 AM – 12:00 PM","EXAM — Political Law","exam"],
+        ["2:00 PM – 6:00 PM","EXAM — Commercial Law","exam"],
+      ]},
+      { date:"2026-07-10", dow:"Fri", subject:"Mock Bar Exam — Day 2", tasks:[
+        ["8:30 AM – 12:30 PM","EXAM — Civil Law","exam"],
+      ]},
+      { date:"2026-07-11", dow:"Sat", subject:"Mock Bar Exam — Day 3", tasks:[
+        ["9:00 AM – 12:00 PM","EXAM — Criminal Law","exam"],
+        ["2:00 PM – 6:00 PM","EXAM — Remedial Law","exam"],
+      ]},
+    ]
+  },
+];
+
+
+/* ---------- category meta ---------- */
+const CAT = {
+  work:{label:"Office",focus:false,dim:true}, commute:{label:"Commute",focus:false,dim:true},
+  meal:{label:"Meal",focus:false,dim:true}, brk:{label:"Break",focus:false,dim:true},
+  sleep:{label:"Sleep",focus:false,dim:true}, dump:{label:"Wind-down",focus:false,dim:true},
+  move:{label:"Movement",focus:false,dim:true}, life:{label:"Life",focus:false,dim:true},
+  study:{label:"Study",focus:true,dim:false}, sim:{label:"Simulation",focus:true,dim:false},
+  exam:{label:"Exam",focus:true,dim:false,exam:true},
+};
+const FOCUS = c => CAT[c] && CAT[c].focus;
+const isExam = c => CAT[c] && CAT[c].exam;
+const EXAM1 = "2026-07-08";
+
+/* ---------- cute SVGs ---------- */
+const CLOUD = `<svg viewBox="0 0 40 30" width="30" height="23" aria-hidden="true">
+  <g fill="#ffffff"><circle cx="12" cy="18" r="9"/><circle cx="22" cy="13.5" r="11"/><circle cx="31" cy="19" r="8"/><rect x="9" y="17" width="26" height="10" rx="5"/></g>
+  <circle cx="14.5" cy="20.5" r="2.3" fill="#ffb6d5"/><circle cx="29" cy="20.5" r="2.3" fill="#ffb6d5"/>
+  <circle cx="18" cy="15.5" r="1.7" fill="#6b4a63"/><circle cx="25.5" cy="15.5" r="1.7" fill="#6b4a63"/>
+  <path d="M20 18.6q1.8 1.7 3.5 0" stroke="#6b4a63" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>`;
+const HEART = `<svg viewBox="0 0 24 24" aria-hidden="true"><path class="hf" d="M12 20.3s-6.8-4.3-9.3-8.5C1 8.7 2.6 5.4 5.9 5.4c2 0 3.5 1.1 6.1 3.6 2.6-2.5 4.1-3.6 6.1-3.6 3.3 0 4.9 3.3 3.2 6.4-2.5 4.2-9.3 8.5-9.3 8.5z"/></svg>`;
+const PENCIL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`;
+
+/* ---------- state + layered storage ---------- */
+const KEY = "barprog_v1";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzf5t4muYjdBj4cPVJSXbjZtfNnjsyMhdxM_Rngkwg1Xj9aYG8aQvVKDBmnB70_BSDF/exec";
+let done = {};   // {id:true}
+let notes = {};  // {id:"text"}
+let mode = "memory"; // "claude" | "sheet" | "local" | "memory"
+let syncStatus = "idle"; // "idle" | "saving" | "saved" | "error"
+
+function todayStr(){ const d=new Date(),p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function tid(date,i){ return date+"#"+i; }
+function showBanner(){ document.getElementById("storeBanner").style.display="block"; }
+
+function setSyncIndicator(s){
+  syncStatus=s;
+  const el=document.getElementById("syncDot");
+  if(!el) return;
+  const labels={idle:"Synced ✓",saving:"Saving…",saved:"Saved ✓",error:"Sync error"};
+  const colors={idle:"var(--lilac)",saving:"var(--pink)",saved:"var(--lilac)",error:"var(--coral)"};
+  el.textContent=labels[s]||"";
+  el.style.color=colors[s]||"var(--muted)";
+}
+
+function adopt(raw){
+  // accept new format {done,notes} or legacy flat {id:true}
+  if(raw && (raw.done || raw.notes)){ done=raw.done||{}; notes=raw.notes||{}; }
+  else if(raw && typeof raw==="object"){ done=raw; notes={}; }
+}
+async function loadDone(){
+  // 1. Try Google Sheet sync first
+  try{
+    const r=await fetch(SHEET_URL,{method:"GET"});
+    if(r.ok){
+      const text=await r.text();
+      if(text && text.trim() && text.trim()!=="{}"){
+        adopt(JSON.parse(text));
+      }
+      mode="sheet"; setSyncIndicator("idle"); return;
+    }
+  }catch(e){}
+
+  // 2. Fallback: Claude artifact storage
+  if(typeof window.storage!=="undefined" && window.storage && window.storage.get){
+    mode="claude";
+    try{ const r=await window.storage.get(KEY,false); if(r&&r.value) adopt(JSON.parse(r.value)); }catch(e){}
+    return;
+  }
+  // 3. Fallback: localStorage
+  try{
+    const probe="__p"+Date.now(); localStorage.setItem(probe,"1"); localStorage.removeItem(probe);
+    const v=localStorage.getItem(KEY); if(v) adopt(JSON.parse(v));
+    mode="local"; return;
+  }catch(e){}
+  mode="memory";
+}
+let saveTimer=null;
+function payload(){ return JSON.stringify({v:2,done:done,notes:notes}); }
+async function saveNow(){
+  if(mode==="sheet"){
+    setSyncIndicator("saving");
+    try{
+      const r=await fetch(SHEET_URL,{method:"POST",body:payload()});
+      if(r.ok){ setSyncIndicator("saved"); setTimeout(()=>setSyncIndicator("idle"),2000); }
+      else{ setSyncIndicator("error"); }
+    }catch(e){ setSyncIndicator("error"); }
+    return;
+  }
+  if(mode==="claude"){ try{ await window.storage.set(KEY,payload(),false); }catch(e){ mode="memory"; showBanner(); } }
+  else if(mode==="local"){ try{ localStorage.setItem(KEY,payload()); }catch(e){ mode="memory"; showBanner(); } }
+  else showBanner();
+}
+function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,350); }
+
+/* ---------- totals ---------- */
+function focusTotals(){ let t=0,d=0; WEEKS.forEach(w=>w.days.forEach(day=>day.tasks.forEach((tk,i)=>{ if(FOCUS(tk[2])){t++; if(done[tid(day.date,i)])d++;} }))); return {t,d}; }
+function weekFocus(w){ let t=0,d=0; w.days.forEach(day=>day.tasks.forEach((tk,i)=>{ if(FOCUS(tk[2])){t++; if(done[tid(day.date,i)])d++;} })); return {t,d}; }
+function dayFocus(day){ let t=0,d=0; day.tasks.forEach((tk,i)=>{ if(FOCUS(tk[2])){t++; if(done[tid(day.date,i)])d++;} }); return {t,d}; }
+
+/* ---------- streak: consecutive days (ending today/yesterday) with >=1 focus done ---------- */
+function focusDoneDates(){
+  const set=new Set();
+  WEEKS.forEach(w=>w.days.forEach(day=>day.tasks.forEach((tk,i)=>{ if(FOCUS(tk[2])&&done[tid(day.date,i)]) set.add(day.date); })));
+  return set;
+}
+function iso(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function computeStreak(){
+  const set=focusDoneDates(); let s=0; let d=new Date(todayStr()+"T00:00:00");
+  if(!set.has(iso(d))) d.setDate(d.getDate()-1);      // today not done yet -> don't break, start at yesterday
+  while(set.has(iso(d))){ s++; d.setDate(d.getDate()-1); }
+  return s;
+}
+
+/* ---------- date helpers ---------- */
+const MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+function fmtDate(s){ const [y,m,d]=s.split("-").map(Number); return {d:String(d),m:MON[m-1]}; }
+function daysBetween(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000); }
+
+/* ---------- render ---------- */
+function ringHTML(d,t){
+  const R=16,C=2*Math.PI*R,off=C*(1-(t?d/t:0));
+  return `<div class="ring" aria-hidden="true"><svg width="42" height="42" viewBox="0 0 42 42">
+    <circle cx="21" cy="21" r="${R}" fill="none" stroke="var(--surface2)" stroke-width="4"/>
+    <circle cx="21" cy="21" r="${R}" fill="none" stroke="var(--pink)" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+  </svg><span class="rt">${d}/${t}</span></div>`;
+}
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function render(){
+  const today=todayStr(); const root=document.getElementById("weeks"); root.innerHTML="";
+  WEEKS.forEach(w=>{
+    const wf=weekFocus(w); const sec=document.createElement("section"); sec.className="week"; sec.dataset.wn=w.n;
+    const hasToday=w.days.some(d=>d.date===today);
+    let head=`<div class="week-h"><span class="week-n">${w.label||("WK "+w.n)}</span><span class="week-t">${w.title}</span>
+      <span class="week-bar"><i style="width:${wf.t?Math.round(wf.d/wf.t*100):0}%"></i></span><span class="week-c">${wf.d}/${wf.t}</span></div>`;
+    if(w.sub) head+=`<div class="week-sub">${w.sub}</div>`;
+    sec.innerHTML=head;
+    w.days.forEach(day=>{
+      const df=dayFocus(day); const exam=day.tasks.some(t=>isExam(t[2])); const isToday=day.date===today; const dt=fmtDate(day.date);
+      const det=document.createElement("details"); det.className="day"+(exam?" is-exam":"")+(isToday?" is-today":""); det.dataset.date=day.date;
+      if(isToday || (today<"2026-06-10" && day.date==="2026-06-10")) det.open=true;
+      let badges=""; if(isToday) badges+=`<span class="badge today">Today</span>`; if(exam) badges+=`<span class="badge exam">Exam day</span>`;
+      let extra=[]; if(day.tag) extra.push(day.tag); if(!exam) extra.push(df.t+(df.t===1?" session":" sessions"));
+      let metaInner=badges+(extra.length?`<span style="color:var(--faint)">${extra.join(" · ")}</span>`:"");
+      if(!metaInner) metaInner=`<span style="color:var(--faint)">${df.t} sessions</span>`;
+      let rows="";
+      day.tasks.forEach((tk,i)=>{
+        const [time,text,cat]=tk; const meta=CAT[cat]||{label:cat};
+        const id=tid(day.date,i); const ck=done[id]?"true":"false";
+        const cls=(meta.focus?"focus ":"")+(meta.exam?"exam ":"")+(meta.dim?"dim":"");
+        const lineCls="rowline"+(meta.dim?" dimline":"");
+        const tag=meta.focus?`<span class="tag">${meta.label}</span>`:"";
+        const canNote=!!meta.focus;
+        const noteTxt=notes[id]?`<span class="note-preview" data-pv="${id}">“${esc(notes[id])}”</span>`:`<span class="note-preview" data-pv="${id}" hidden></span>`;
+        const noteBtn=canNote?`<button class="note-btn${notes[id]?" has":""}" data-note="${id}" aria-label="Add a quick note" title="Quick note">${PENCIL}</button>`:"";
+        rows+=`<div class="${lineCls}">
+          <div class="row ${cls}" role="group" data-id="${id}" aria-checked="${ck}">
+            <button class="check" role="checkbox" aria-checked="${ck}" aria-label="Mark done" data-toggle="${id}">${HEART}</button>
+            <button class="row-body" data-toggle="${id}"><span class="row-time">${time}</span><span class="row-text">${text}${tag}</span>${noteTxt}</button>
+            ${noteBtn}
+          </div>
+          <div class="note-edit" data-edit="${id}" hidden>
+            <textarea data-ta="${id}" placeholder="Weak topic, reminder, how it went…">${notes[id]?esc(notes[id]):""}</textarea>
+            <div class="hint">Saves automatically</div>
+          </div>
+        </div>`;
+      });
+      det.innerHTML=`<summary class="day-h">
+        <span class="date-chip"><span class="d">${dt.d}</span><span class="m">${dt.m}</span><span class="dow">${day.dow}</span></span>
+        <span class="day-mid"><span class="day-subj">${day.subject}</span>
+          <span class="day-meta">${metaInner}</span></span>
+        ${ringHTML(df.d,df.t)}
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </summary><div class="day-body">${rows}</div>`;
+      sec.appendChild(det);
+    });
+    root.appendChild(sec);
+  });
+  bindRows(); updateMeters(); updateNext();
+}
+
+function bindRows(){
+  document.querySelectorAll("[data-toggle]").forEach(el=>{
+    el.addEventListener("click",e=>{ e.preventDefault(); toggle(el.getAttribute("data-toggle")); });
+  });
+  document.querySelectorAll("[data-note]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id=btn.getAttribute("data-note");
+      const ed=document.querySelector('[data-edit="'+id+'"]');
+      const open=ed.hasAttribute("hidden");
+      if(open){ ed.removeAttribute("hidden"); ed.querySelector("textarea").focus(); }
+      else ed.setAttribute("hidden","");
+    });
+  });
+  document.querySelectorAll("[data-ta]").forEach(ta=>{
+    ta.addEventListener("input",()=>{
+      const id=ta.getAttribute("data-ta"); const v=ta.value.trim();
+      if(v) notes[id]=v; else delete notes[id];
+      const pv=document.querySelector('[data-pv="'+id+'"]');
+      if(v){ pv.textContent="“"+v+"”"; pv.removeAttribute("hidden"); } else { pv.textContent=""; pv.setAttribute("hidden",""); }
+      const nb=document.querySelector('[data-note="'+id+'"]'); if(nb) nb.classList.toggle("has",!!v);
+      queueSave();
+    });
+    ta.addEventListener("blur",()=>{ if(!ta.value.trim()){ const ed=ta.closest(".note-edit"); ed.setAttribute("hidden",""); } });
+  });
+}
+
+function setChecked(id,val){
+  document.querySelectorAll('.row[data-id="'+id+'"], .check[data-toggle="'+id+'"]').forEach(el=>el.setAttribute("aria-checked",val?"true":"false"));
+}
+function toggle(id){
+  if(done[id]) delete done[id]; else done[id]=true;
+  setChecked(id,!!done[id]); queueSave();
+  refreshDay(id); updateMeters(); updateNext();
+}
+function refreshDay(id){
+  const date=id.split("#")[0];
+  const day=WEEKS.flatMap(w=>w.days).find(d=>d.date===date); const df=dayFocus(day);
+  const det=document.querySelector('.day[data-date="'+date+'"]');
+  if(det){ const r=det.querySelector(".ring");
+    if(r){ const C=2*Math.PI*16; r.querySelector("circle:last-child").setAttribute("stroke-dashoffset",(C*(1-(df.t?df.d/df.t:0))).toFixed(1)); r.querySelector(".rt").textContent=df.d+"/"+df.t; } }
+  const w=WEEKS.find(w=>w.days.some(d=>d.date===date)); const wf=weekFocus(w);
+  const sec=document.querySelector('.week[data-wn="'+w.n+'"]');
+  if(sec){ sec.querySelector(".week-bar > i").style.width=(wf.t?Math.round(wf.d/wf.t*100):0)+"%"; sec.querySelector(".week-c").textContent=wf.d+"/"+wf.t; }
+}
+
+function updateMeters(){
+  const {t,d}=focusTotals(); const pct=t?Math.round(d/t*100):0;
+  document.getElementById("pctNum").innerHTML=pct+'<span class="u">%</span>';
+  document.getElementById("pctBar").style.width=pct+"%";
+  document.getElementById("pctDet").textContent=d+" of "+t+" sessions";
+  document.getElementById("tbCount").textContent=d+" / "+t;
+  document.getElementById("tbBar").style.width=pct+"%";
+  const mascot=document.getElementById("pctMascot"); mascot.innerHTML=CLOUD; mascot.style.left=pct+"%";
+
+  // streak
+  const s=computeStreak();
+  document.getElementById("streakNum").textContent=s;
+  document.getElementById("streakWord").textContent=(s===1?"day streak":"day streak");
+  const msg=document.getElementById("streakMsg");
+  if(s===0) msg.textContent="Finish a session today to start your streak ✨";
+  else if(s<3) msg.textContent="Lovely start — keep it going 💗";
+  else if(s<7) msg.textContent="You're on a roll!";
+  else msg.textContent="Unstoppable. So proud of you ✨";
+
+  // countdown
+  const today=todayStr(); const n=daysBetween(today,EXAM1);
+  const cn=document.getElementById("countNum"),cu=document.getElementById("countUnit"),cs=document.getElementById("countSub");
+  if(n>1){cn.firstChild.textContent=n;cu.textContent="days";cs.textContent="First exam · July 8";}
+  else if(n===1){cn.firstChild.textContent="1";cu.textContent="day";cs.textContent="First exam · tomorrow";}
+  else if(n===0){cn.firstChild.textContent="0";cu.textContent="";cs.textContent="Exam Day 1 is today 💪";}
+  else{ const after=daysBetween(today,"2026-07-11");
+    if(after>=0){cn.firstChild.textContent="LIVE";cu.textContent="";cs.textContent="Exam week in progress";}
+    else{cn.firstChild.textContent="DONE";cu.textContent="";cs.textContent="You conquered it 🎉";} }
+}
+
+function updateNext(){
+  const today=todayStr(); const flat=[];
+  WEEKS.forEach(w=>w.days.forEach(day=>day.tasks.forEach((tk,i)=>{ if(FOCUS(tk[2])) flat.push({date:day.date,dow:day.dow,subject:day.subject,time:tk[0],text:tk[1],cat:tk[2],id:tid(day.date,i)}); })));
+  let nx=flat.find(f=>f.date>=today&&!done[f.id]); let overdue=false;
+  if(!nx){ nx=flat.find(f=>f.date<today&&!done[f.id]); overdue=!!nx; }
+  const card=document.getElementById("nextCard"); card.hidden=false; card.classList.remove("is-exam","is-done");
+  if(!nx){ card.classList.add("is-done");
+    document.getElementById("nextLabel").textContent="All done"; document.getElementById("nextWhen").textContent="";
+    document.getElementById("nextTask").textContent="Every sprint is ticked off. You did it 🎉";
+    document.getElementById("nextDay").innerHTML=""; document.getElementById("nextBtn").style.display="none"; return; }
+  document.getElementById("nextBtn").style.display="";
+  const exam=isExam(nx.cat); if(exam) card.classList.add("is-exam");
+  document.getElementById("nextLabel").textContent=overdue?"Catch up":(exam?"Exam":"Up next");
+  const dd=daysBetween(today,nx.date); let when="";
+  if(nx.date===today) when="Today"; else if(dd===1) when="Tomorrow"; else if(dd>1) when="In "+dd+" days"; else when=Math.abs(dd)+(Math.abs(dd)===1?" day ago":" days ago");
+  document.getElementById("nextWhen").textContent=when;
+  document.getElementById("nextTask").textContent=nx.text;
+  const dt=fmtDate(nx.date);
+  document.getElementById("nextDay").innerHTML=`<span class="next-time">${nx.time}</span> · ${nx.dow} ${dt.m} ${dt.d} · ${nx.subject}`;
+  const btn=document.getElementById("nextBtn"); btn.textContent=exam?"Mark exam block done":"Mark this session done";
+  btn.onclick=()=>{ done[nx.id]=true; setChecked(nx.id,true); queueSave(); refreshDay(nx.id); updateMeters(); updateNext();
+    const row=document.querySelector('.row[data-id="'+nx.id+'"]'); if(row) row.closest("details").open=true; };
+}
+
+/* ---------- controls ---------- */
+function setFilter(f){ document.body.classList.toggle("only-focus",f);
+  document.getElementById("fAll").setAttribute("aria-pressed",String(!f));
+  document.getElementById("fFocus").setAttribute("aria-pressed",String(f)); }
+document.getElementById("fAll").onclick=()=>setFilter(false);
+document.getElementById("fFocus").onclick=()=>setFilter(true);
+document.getElementById("todayBtn").onclick=()=>{ const today=todayStr();
+  let el=document.querySelector('.day[data-date="'+today+'"]');
+  if(!el){ const all=[...document.querySelectorAll(".day")]; el=all.find(d=>d.dataset.date>=today)||all[0]; }
+  if(el){ el.open=true; el.scrollIntoView({behavior:"smooth",block:"center"}); } };
+document.getElementById("resetBtn").onclick=async()=>{
+  if(!confirm("Clear every checkmark and note and start fresh? This can't be undone.")) return;
+  done={}; notes={};
+  if(mode==="sheet"){ try{ setSyncIndicator("saving"); await fetch(SHEET_URL,{method:"POST",body:"{}"}); setSyncIndicator("idle"); }catch(e){ setSyncIndicator("error"); } }
+  else if(mode==="claude"){ try{ await window.storage.delete(KEY,false);}catch(e){} }
+  else if(mode==="local"){ try{ localStorage.removeItem(KEY);}catch(e){} }
+  render(); window.scrollTo({top:0,behavior:"smooth"});
+};
+
+/* ---------- boot ---------- */
+(async function(){ await loadDone(); if(mode==="memory") showBanner(); render(); })();
+</script>
+</body>
+</html>
